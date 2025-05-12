@@ -7,7 +7,7 @@ if __name__ == '__main__':
     print("Regular spacing between images of stack?")
     regSpacing = bool(input())
 
-    path = "./image_stack_2"
+    path = "./image_stack"
 
     width, height, depth = image_gen(regSpacing, path, start_size)
 

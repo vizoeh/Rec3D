@@ -65,9 +65,9 @@ def image_gen(inSpacing, stack_path, start_size):
 
         case False:
 
-            fac = 10 # Factor by which you multiply each coordinate
+            fac = 1 # Factor by which you multiply each coordinate
             # Variable that saves the volume depth
-            temp = int((start_size[-1][0] + start_size[-1][1])*10)
+            temp = int((start_size[-1][0] + start_size[-1][1])*fac)
 
             #? Creates the blank images that will become the side views
             imageRight = Image.new('RGB', (height, temp), (255,255,255))
@@ -93,16 +93,16 @@ def image_gen(inSpacing, stack_path, start_size):
                     break
                 
                 rowRight = image.crop((cut_yz-1,0,cut_yz,height)).rotate(-90, expand = True)
-                imageRight.paste(rowRight.resize((height,int(start_size[c][1]*10))), (0, int(start_size[c][0]*10)))
+                imageRight.paste(rowRight.resize((height,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
 
                 rowLeft = image.crop((0,0,1,height)).rotate(90, expand = True)
-                imageLeft.paste(rowLeft.resize((height,int(start_size[c][1]*10))), (0, int(start_size[c][0]*10)))
+                imageLeft.paste(rowLeft.resize((height,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
 
                 rowFront = image.crop((0,height-1,cut_yz,height))
-                imageFront.paste(rowFront.resize((cut_yz,int(start_size[c][1]*10))), (0, int(start_size[c][0]*10)))
+                imageFront.paste(rowFront.resize((cut_yz,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
 
                 rowBack = image.crop((0,0,cut_yz,1)).rotate(180, expand = True)
-                imageBack.paste(rowBack.resize((cut_yz,int(start_size[c][1]*10))), (0, int(start_size[c][0]*10)))
+                imageBack.paste(rowBack.resize((cut_yz,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
                 c += 1
     
 
@@ -112,7 +112,7 @@ def image_gen(inSpacing, stack_path, start_size):
 
     if cut_yz == "full:":
         imageRight.save("./temp/imageRight.png")
-    else: ImageEnhance.Brightness(imageRight).enhance(0.5).save("./temp/imageRight.png")
+    else: ImageEnhance.Brightness(imageRight).enhance(1).save("./temp/imageRight.png")
 
     imageBottom.crop((0,0,cut_yz,height)).rotate(90, expand=True).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageBottom.png")
     imageTop.rotate(-90, expand=True).crop((0,0,height,cut_yz)).save("./temp/imageTop.png")
@@ -125,4 +125,4 @@ def image_gen(inSpacing, stack_path, start_size):
 
 if __name__ == '__main__':
     from csv_reader import start_size
-    image_gen(False,"./image_stack_2", start_size)
+    image_gen(False,"./image_stack", start_size)
