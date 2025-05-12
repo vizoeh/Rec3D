@@ -1,26 +1,23 @@
 import pyvista as pv
-import glob, os
+from gen_image import image_gen
+from csv_reader import start_size
 
-def render(width : int, height : int, depth : int):
+path = './image_stack'
+regSpacing = False
 
-    """
-    Renders the cube using pyvista.\n
-    Parameters:
-        width : width of the box
-        height : lenght of the box (counter-intuitive, I know!)
-        depth : height of the box
+width, height, depth = image_gen(regSpacing, path, start_size, 100)
 
-    """
-
+def texture():
     #! Simple dictionary that associates the position with the file.
     to_wrap = {"Top":"./temp/imageTop.png",
-            "Bottom":"./temp/imageBottom.png",
-            "Front":"./temp/imageFront.png",
-            "Back":"./temp/imageBack.png",
-            "Left":"./temp/imageLeft.png",
-            "Right":"./temp/imageRight.png"
-    }
-
+                "Bottom":"./temp/imageBottom.png",
+                "Front":"./temp/imageFront.png",
+                "Back":"./temp/imageBack.png",
+                "Left":"./temp/imageLeft.png",
+                "Right":"./temp/imageRight.png"
+        }
+    return to_wrap
+def planes(width, height, depth):
     w, h, d = width / 2, height / 2, depth / 2
 
     #! Dictionary that associates name with position in space
@@ -31,17 +28,42 @@ def render(width : int, height : int, depth : int):
         "Bottom": pv.Plane(center=(0, -d, 0), direction=(0, -1, 0), i_size=height, j_size=width),
         "Front":  pv.Plane(center=(0, 0, +h), direction=(0, 0, 1), i_size=width, j_size=depth),
         "Back":   pv.Plane(center=(0, 0, -h), direction=(0, 0, -1), i_size=width, j_size=depth),
-    }
+        }
+    return faces
+def textures(): 
+    textures = {face: pv.read_texture(file) for face, file in texture().items()}
+    return textures
 
-    textures = {face: pv.read_texture(file) for face, file in to_wrap.items()}
-    
-    plotter = pv.Plotter()
+        
+plotter = pv.Plotter()
+plane_actors = {}
 
-    for face_name, plane in faces.items():
-        plotter.add_mesh(plane, texture=textures[face_name])
+for face_name, plane in planes(width, height, depth).items():
+    actor = plotter.add_mesh(plane, texture=textures()[face_name])
+    plane_actors[face_name] = actor
 
-    plotter.show_axes()
-    plotter.show()
+plotter.show_axes()
 
-if __name__ == "__main__":
-    render(1000,1000,48)
+def update(value):
+    width, height, depth = image_gen(False, './image_stack', start_size, round(value,1))
+
+    for actor in plane_actors.values():
+        plotter.remove_actor(actor)
+    plane_actors.clear()
+
+    for face_name, plane in planes(width, height, depth).items():
+        actor = plotter.add_mesh(plane, texture=textures()[face_name])
+        plane_actors[face_name] = actor
+
+    plotter.render()
+    print(f'\nRendering image at YZ {round(value,1)}%', end='\n')
+
+plotter.add_slider_widget(
+    callback=update,
+    rng=[10, 100],  # Slider range for YZ cut (adjust as necessary)
+    value=100,       # Initial value for slider
+    title="YZ Cut (%)",
+    style="modern"
+)
+
+plotter.show()

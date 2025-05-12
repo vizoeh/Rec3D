@@ -1,7 +1,7 @@
 from PIL import Image, ImageEnhance
 import os,  glob, time
 
-def image_gen(inSpacing, stack_path, start_size):
+def image_gen(inSpacing, stack_path, start_size, YZ):
 
     #? Creates an ordered list with all images ending with [double-digit number].png, ex: image00.png, image01.png ... image99.png
     image_files = sorted(
@@ -10,14 +10,11 @@ def image_gen(inSpacing, stack_path, start_size):
     #? Defines the top and bottom images, saving the top most image's dimensions
     imageTop, imageBottom = map(Image.open, (image_files[0], image_files[-1]))
     width, height = imageTop.size
-    print(f"Stack dimensions: {width} x {height} - based on first image")
+    print(f"Stack dimensions: {width} x {height} - based on first image at {round(YZ,1)}%")
 
-    print("Cut a plane?")
-    cut_yz = input()
-    if cut_yz == "full":
-        cut_yz = width
-    else: cut_yz = int(cut_yz)
+    cut_yz = int(YZ*width/100) 
 
+    print(cut_yz)
 
     match inSpacing:
         case True:
@@ -125,4 +122,4 @@ def image_gen(inSpacing, stack_path, start_size):
 
 if __name__ == '__main__':
     from csv_reader import start_size
-    image_gen(False,"./image_stack", start_size)
+    image_gen(False,"./image_stack", start_size, 50)
