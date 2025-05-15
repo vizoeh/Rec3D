@@ -1,5 +1,5 @@
 from PIL import Image, ImageEnhance
-import os,  glob, time
+import os,  glob
 
 def image_gen(inSpacing, stack_path, start_size, YZ):
 
@@ -109,7 +109,7 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
 
     if cut_yz == "full:":
         imageRight.save("./temp/imageRight.png")
-    else: ImageEnhance.Brightness(imageRight).enhance(1).save("./temp/imageRight.png")
+    else: ImageEnhance.Brightness(imageRight).enhance(0.6).save("./temp/imageRight.png")
 
     imageBottom.crop((0,0,cut_yz,height)).rotate(90, expand=True).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageBottom.png")
     imageTop.rotate(-90, expand=True).crop((0,0,height,cut_yz)).save("./temp/imageTop.png")
@@ -119,7 +119,6 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
     """
     return [cut_yz,height,imageFront.height]
 
-
 if __name__ == '__main__':
     from csv_reader import start_size
-    image_gen(False,"./image_stack", start_size, 50)
+    image_gen(False,"./image_stack_pre", start_size, 100)

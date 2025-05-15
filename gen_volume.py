@@ -2,7 +2,7 @@ import pyvista as pv
 from gen_image import image_gen
 from csv_reader import start_size
 
-path = './image_stack'
+path = './image_stack/'
 regSpacing = False
 
 width, height, depth = image_gen(regSpacing, path, start_size, 100)
@@ -45,7 +45,7 @@ for face_name, plane in planes(width, height, depth).items():
 plotter.show_axes()
 
 def update(value):
-    width, height, depth = image_gen(False, './image_stack', start_size, round(value,1))
+    width, height, depth = image_gen(False, path, start_size, round(value,1))
 
     for actor in plane_actors.values():
         plotter.remove_actor(actor)
