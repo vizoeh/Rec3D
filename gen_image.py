@@ -1,7 +1,7 @@
 from PIL import Image, ImageEnhance
 import os,  glob
 
-def image_gen(inSpacing, stack_path, start_size, YZ):
+def image_gen(inSpacing, stack_path, start_size, XY, YZ):
 
     #? Creates an ordered list with all images ending with [double-digit number].png, ex: image00.png, image01.png ... image99.png
     image_files = sorted(
@@ -12,9 +12,8 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
     width, height = imageTop.size
     print(f"Stack dimensions: {width} x {height} - based on first image at {round(YZ,1)}%")
 
-    cut_yz = int(YZ*width/100) 
-
-    print(cut_yz)
+    cut_yz = int(YZ*width/100)
+    cut_xy = int(XY*height/100)
 
     match inSpacing:
         case True:
@@ -46,7 +45,7 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
                     break
 
                 #! Crops the LAST pixel row/column in the current image to create size images. - MUST ACCOUNT FOR CROP!
-                rowRight = image.crop((cut_yz-1,0,cut_yz,height)).rotate(-90, expand = True)
+                rowRight = image.crop((cut_yz-1,0,cut_yz,cut_xy)).rotate(-90, expand = True)
                 imageRight.paste(rowRight.resize((height,spacing)), (0,c))
 
                 rowLeft = image.crop((0,0,1,height)).rotate(90, expand = True)
@@ -67,8 +66,8 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
             temp = int((start_size[-1][0] + start_size[-1][1])*fac)
 
             #? Creates the blank images that will become the side views
-            imageRight = Image.new('RGB', (height, temp), (255,255,255))
-            imageLeft = Image.new('RGB', (height, temp), (255,255,255))
+            imageRight = Image.new('RGB', (cut_xy, temp), (255,255,255))
+            imageLeft = Image.new('RGB', (cut_xy, temp), (255,255,255))
             imageFront = Image.new('RGB', (cut_yz, temp), (255,255,255))
             imageBack = Image.new('RGB', (cut_yz, temp), (255,255,255))
             print("Volume depth (px):", temp)
@@ -89,13 +88,13 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
                     print("CSV file doesn't account for all image files")
                     break
                 
-                rowRight = image.crop((cut_yz-1,0,cut_yz,height)).rotate(-90, expand = True)
-                imageRight.paste(rowRight.resize((height,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
+                rowRight = image.crop((cut_yz-1,0,cut_yz,cut_xy)).rotate(-90, expand = True)
+                imageRight.paste(rowRight.resize((cut_xy,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
 
-                rowLeft = image.crop((0,0,1,height)).rotate(90, expand = True)
-                imageLeft.paste(rowLeft.resize((height,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
+                rowLeft = image.crop((0,0,1,cut_xy)).rotate(90, expand = True)
+                imageLeft.paste(rowLeft.resize((cut_xy,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
 
-                rowFront = image.crop((0,height-1,cut_yz,height))
+                rowFront = image.crop((0,cut_xy-1,cut_yz,cut_xy))
                 imageFront.paste(rowFront.resize((cut_yz,int(start_size[c][1]*fac))), (0, int(start_size[c][0]*fac)))
 
                 rowBack = image.crop((0,0,cut_yz,1)).rotate(180, expand = True)
@@ -111,14 +110,14 @@ def image_gen(inSpacing, stack_path, start_size, YZ):
         imageRight.save("./temp/imageRight.png")
     else: ImageEnhance.Brightness(imageRight).enhance(0.6).save("./temp/imageRight.png")
 
-    imageBottom.crop((0,0,cut_yz,height)).rotate(90, expand=True).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageBottom.png")
-    imageTop.rotate(-90, expand=True).crop((0,0,height,cut_yz)).save("./temp/imageTop.png")
+    imageBottom.crop((0,0,cut_yz,cut_xy)).rotate(90, expand=True).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageBottom.png")
+    imageTop.rotate(90, expand=True).crop((0,0,cut_xy,cut_yz)).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageTop.png")
 
     """
     Saves four side images for reconstruction, and returns a list containing: [width, "height" (lenght), depth]
     """
-    return [cut_yz,height,imageFront.height]
+    return [cut_yz,cut_xy,imageFront.height]
 
 if __name__ == '__main__':
     from csv_reader import start_size
-    image_gen(False,"./image_stack_pre", start_size, 100)
+    image_gen(False,"./image_stack", start_size, 50, 50)

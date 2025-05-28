@@ -5,7 +5,7 @@ from csv_reader import start_size
 path = './image_stack/'
 regSpacing = False
 
-width, height, depth = image_gen(regSpacing, path, start_size, 100)
+width, height, depth = image_gen(regSpacing, path, start_size, 100, 100)
 
 def texture():
     #! Simple dictionary that associates the position with the file.
@@ -44,8 +44,10 @@ for face_name, plane in planes(width, height, depth).items():
 
 plotter.show_axes()
 
-def update(value):
-    width, height, depth = image_gen(False, path, start_size, round(value,1))
+cuts = {"xy":100, "yz":100}
+
+def update(): #Defines the function that will generate the new images, remove the old ones and plot the newer
+    width, height, depth = image_gen(False, path, start_size, round(cuts["xy"],1), round(cuts["yz"],1))
 
     for actor in plane_actors.values():
         plotter.remove_actor(actor)
@@ -56,14 +58,32 @@ def update(value):
         plane_actors[face_name] = actor
 
     plotter.render()
-    print(f'\nRendering image at YZ {round(value,1)}%', end='\n')
+    print(f'\nRendering image at XY {round(cuts["xy"],1)}% and YZ {round(cuts["yz"],1)}', end='\n')
+def xy_update(value): #Defines the XY specific
+    cuts["xy"] = value
+    update()
+def yz_update(value): #Defines the YZ Specific
+    cuts["yz"] = value
+    update()
 
 plotter.add_slider_widget(
-    callback=update,
+    callback=xy_update,
+    rng=[10, 100],  # Slider range for YZ cut (adjust as necessary)
+    value=100,       # Initial value for slider
+    title="XY Cut (%)",
+    style="modern",
+    pointa= (0,0.92),
+    pointb= (0.3, 0.92)
+)
+
+plotter.add_slider_widget(
+    callback=yz_update,
     rng=[10, 100],  # Slider range for YZ cut (adjust as necessary)
     value=100,       # Initial value for slider
     title="YZ Cut (%)",
-    style="modern"
+    style="modern",
+    pointa= (0.3,0.92),
+    pointb= (0.6, 0.92)
 )
 
 plotter.show()
