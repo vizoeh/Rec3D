@@ -108,10 +108,10 @@ def image_gen(inSpacing, stack_path, start_size, XY, YZ):
 
     if cut_yz == "full:":
         imageRight.save("./temp/imageRight.png")
-    else: ImageEnhance.Brightness(imageRight).enhance(0.6).save("./temp/imageRight.png")
+    else: ImageEnhance.Brightness(imageRight).enhance(1).save("./temp/imageRight.png")
 
     imageBottom.crop((0,0,cut_yz,cut_xy)).rotate(90, expand=True).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageBottom.png")
-    imageTop.rotate(90, expand=True).crop((0,0,cut_xy,cut_yz)).transpose(Image.Transpose.FLIP_LEFT_RIGHT).save("./temp/imageTop.png")
+    imageTop.crop((0,0,cut_yz,cut_xy)).rotate(-90, expand=True).save("./temp/imageTop.png")
 
     """
     Saves four side images for reconstruction, and returns a list containing: [width, "height" (lenght), depth]

@@ -2,7 +2,7 @@ import pyvista as pv
 from gen_image import image_gen
 from csv_reader import start_size
 
-path = './image_stack/'
+path = './image_stack/' # "debug_stack" --> to align images in gen_image
 regSpacing = False
 
 width, height, depth = image_gen(regSpacing, path, start_size, 100, 100)
@@ -39,7 +39,7 @@ plotter = pv.Plotter()
 plane_actors = {}
 
 for face_name, plane in planes(width, height, depth).items():
-    actor = plotter.add_mesh(plane, texture=textures()[face_name])
+    actor = plotter.add_mesh(plane, texture=textures()[face_name], lighting=False)
     plane_actors[face_name] = actor
 
 plotter.show_axes()
@@ -54,7 +54,7 @@ def update(): #Defines the function that will generate the new images, remove th
     plane_actors.clear()
 
     for face_name, plane in planes(width, height, depth).items():
-        actor = plotter.add_mesh(plane, texture=textures()[face_name])
+        actor = plotter.add_mesh(plane, texture=textures()[face_name], lighting=False)
         plane_actors[face_name] = actor
 
     plotter.render()
